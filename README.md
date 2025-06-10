@@ -6,7 +6,7 @@
 ## Instalacion 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/EcoFercho/Proyecto-TSS.git
+git clone https://github.com/EcoFercho/Proyecto-TSS.git 
 cd tu-repo
 
 # Instalar dependencias (ejemplo para Python)
