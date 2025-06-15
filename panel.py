@@ -36,22 +36,22 @@ app.layout = html.Div([
 
 @app.callback(Output("page-content", "children"), Input("url", "pathname"))
 def render_page_content(pathname):
-    if pathname == "/simulacion":
+    if pathname == "/":
         return interfaz.layout()
     return html.Div([html.H3("Página no encontrada")])
 
 interfaz.register_callbacks(app)
 
 @app.callback([
-    Output('resultados-texto', 'children'),
+    Output('store-resultados', 'children'),
     Output('store-resultados', 'data')
 ], Input('calcular-proyecciones', 'n_clicks'),
 State('salario-mensual', 'value'), 
 State('meses-ahorro', 'value'),
 State('tasa-crecimiento', 'value'),
-State('upload-data', 'contents'))
+State('tabs-content', 'contents'))
 def calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, contents):
     return algoritmo.calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, contents)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)

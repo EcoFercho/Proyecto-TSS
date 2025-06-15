@@ -5,13 +5,16 @@ import dash_table
 import base64
 import io
 
+# * Se debe considerar los states para obtener los resultados, mas claro el id del componente para que el
+# * Resultado se obtenga desde otro componente se usa state para que se comunique entre los compoenntes mediante
+# * El id del componente
+# ? Nota. Encontrar una forma de comunicar de componente a tab en este caso algo como div.tab.active-tab
+# #
+
 def layout():
     return html.Div([
         html.H3("Proyecciones de ahorro"),
-        dcc.Upload(id='upload-data', children=html.Div(['Arrastra o ', html.A('selecciona un archivo Excel')]),
-                   style={'width': '100%', 'height': '60px', 'lineHeight': '60px', 'borderWidth': '1px',
-                          'borderStyle': 'dashed', 'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px 0'}),
-        html.Div(id='output-data-upload'),
+        
         html.Div([
             dbc.Row([
                 dbc.Col([
@@ -29,12 +32,14 @@ def layout():
             ], className="g-2 align-items-end"),
             dbc.Button("Calcular Proyecciones", id='calcular-proyecciones', color="primary", className="mt-3")
         ]),
-        html.Div(id='resultados-texto', className="mt-4"),
+        # html.Div(id='resultados-texto', className="mt-4"),
         dbc.Tabs([
+            dbc.Tab(label="Ingreso de datos", tab_id="tab-datos"),
+            dbc.Tab(label="Calculo de proyecciones", tab_id="tab-calculos"),
             dbc.Tab(label="Comparación", tab_id="tab-comparacion"),
             dbc.Tab(label="Evolución", tab_id="tab-evolucion"),
             dbc.Tab(label="Detalle EDOs", tab_id="tab-edos"),
-        ], id="tabs", active_tab="tab-comparacion"),
+        ], id="tabs", active_tab="tab-datos"),
         html.Div(id="tabs-content")
     ])
 
@@ -79,8 +84,20 @@ def register_callbacks(app):
     def update_tabs(active_tab, store_data):
         if not store_data:
             return html.Div("Primero calcule proyecciones.")
-
-        if active_tab == "tab-comparacion":
+        
+        if active_tab == "tab-datos":
+            return dbc.Card(dbc.CardBody(
+                html.Div([
+                    # * Mandar este bloque al div de datos
+                    dcc.Upload(id='upload-data', children=html.Div(['Arrastra o ', html.A('selecciona un archivo Excel')]),
+                            style={'width': '100%', 'height': '60px', 'lineHeight': '60px', 'borderWidth': '1px',
+                                    'borderStyle': 'dashed', 'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px 0'}),
+                    html.Div(id='output-data-upload'),
+                    # *
+                ])))
+        elif active_tab == "tab-calculos":
+            return dbc.Card(dbc.CardBody(store_data['calculos']))
+        elif active_tab == "tab-comparacion":
             return dbc.Card(dbc.CardBody([dcc.Graph(figure=store_data['comparacion'])]))
         elif active_tab == "tab-evolucion":
             return dbc.Card(dbc.CardBody([dcc.Graph(figure=store_data['evolucion'])]))

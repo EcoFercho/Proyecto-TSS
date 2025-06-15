@@ -68,8 +68,6 @@ def calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimie
     fig_detalle.add_trace(go.Scatter(x=t, y=(salario_neto_inicial - gasto_mensual) * (((1 + r_7)**t) - 1) / r_7, name="Simple 7%", line=dict(dash='dot')), row=1, col=2)
     fig_detalle.update_layout(title="Detalle Modelos", showlegend=True)
 
-    resultados = {"comparacion": fig_comparacion, "evolucion": fig_evolucion, "detalle": fig_detalle}
-
     texto = [
         html.H6("CALCULO DE INGRESOS EN BASE AL SALARIO MENSUAL", style={'font-weight': 'bold'}),
         html.P(f"Salario mensual neto = Bs. {salario_neto_inicial:,.2f}"),
@@ -89,5 +87,5 @@ def calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimie
         html.P("Escenario 2: Ahorro con modelo diferencial (7% interés)"),
         html.P(f"Ahorro = Bs. {round(A_7[-1][0]):,}")
     ]
-
+    resultados = {"datos": "", "calculos": texto ,"comparacion": fig_comparacion, "evolucion": fig_evolucion, "detalle": fig_detalle}
     return texto, resultados
