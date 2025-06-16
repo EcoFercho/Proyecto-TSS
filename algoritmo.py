@@ -1,4 +1,3 @@
-# archivo: algoritmo.py
 import base64
 import io
 import numpy as np
