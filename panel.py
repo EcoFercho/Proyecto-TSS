@@ -60,7 +60,7 @@ def calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimie
     if not n_clicks:
         return {}, "tab-datos"
     
-    texto, resultados = algoritmo.calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, file_data)
+    resumen, resultados = algoritmo.calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, file_data)
     
     return resultados, "tab-calculos"
 
