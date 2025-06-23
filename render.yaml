@@ -1,8 +1,7 @@
 services:
-       - type: web
-         name: proyecto-tss
-         env: python
-         plan: free
-         buildCommand: pip install -r requirements.txt
-         startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT panel:app.server
-         autoDeploy: true
+  - type: web
+    name: simulador-ahorros
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT interfaz:app.server"
+    plan: free          # opcional

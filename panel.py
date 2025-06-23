@@ -1,4 +1,3 @@
-import os
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output
@@ -6,7 +5,6 @@ import interfaz
 import generarReporte
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-server = app.server  # ← necesario para que Gunicorn lo detecte
 app.title = "Simulador de Ahorros"
 
 SIDEBAR_STYLE = {
@@ -79,6 +77,10 @@ def render_page_content(pathname):
 interfaz.register_callbacks(app)
 generarReporte.register_callbacks(app)
 
+# Exponer servidor para Gunicorn en producción
+server = app.server
+
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8050))  # Render asigna el puerto por variable de entorno
-    app.run(debug=True, host="0.0.0.0", port=port)
+    import os
+    port = int(os.environ.get('PORT', 8050))
+    app.run(host='0.0.0.0', port=port, debug=True)
