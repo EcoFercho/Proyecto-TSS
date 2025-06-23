@@ -1,4 +1,3 @@
-import os
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output
@@ -6,7 +5,6 @@ import interfaz
 import generarReporte
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-server = app.server
 app.title = "Simulador de Ahorros"
 
 SIDEBAR_STYLE = {
@@ -80,5 +78,4 @@ interfaz.register_callbacks(app)
 generarReporte.register_callbacks(app)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8050)) 
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=True)

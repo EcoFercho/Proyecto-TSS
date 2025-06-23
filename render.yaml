@@ -1,8 +1,8 @@
 services:
-  - type: web
-    name: tu-proyecto
-    env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run interfaz.py --server.port $PORT --server.address 0.0.0.0
-    autoDeploy: true
+       - type: web
+         name: proyecto-tss
+         env: python
+         plan: free
+         buildCommand: pip install -r requirements.txt
+         startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT panel:app.server
+         autoDeploy: true
