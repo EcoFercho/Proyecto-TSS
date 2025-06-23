@@ -292,7 +292,7 @@ def register_callbacks(app):
                         'whiteSpace': 'normal'
                     },
                     style_header={
-                        'backgroundColor': '#343a40',
+                        'backgroundColor': "#000000",
                         'color': 'white',
                         'fontWeight': 'bold'
                     },
