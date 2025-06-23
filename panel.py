@@ -1,68 +1,81 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import dcc, html, Input, Output, State
+from dash import dcc, html, Input, Output
 import interfaz
-import algoritmo
+import generarReporte
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-app.title = "Simulacion de ahorros"
+app.title = "Simulador de Ahorros"
 
 SIDEBAR_STYLE = {
-    "position": "fixed", "top": 0, "left": 0, "bottom": 0, 
-    "width": "250px", "padding": "20px", 
-    "background-color": "#343a40", "color": "white"
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "250px",
+    "padding": "20px",
+    "background-color": "#343a40",
+    "color": "white",
+    "overflow-y": "auto"
 }
-CONTENT_STYLE = {"margin-left": "260px", "padding": "20px"}
 
+CONTENT_STYLE = {
+    "margin-left": "280px",
+    "padding": "20px",
+    "background-color": "#f8f9fa"
+}
+
+# Componentes UI
 sidebar = html.Div([
-    html.H3("Dashboard", className="text-center"),
+    html.H3("Dashboard", className="text-center mb-4"),
     html.Hr(),
     dbc.Nav([
         dbc.NavLink("Simulador", href="/simulacion", active="exact"),
-    ], vertical=True, pills=True)
+    ], vertical=True, pills=True, className="mb-4")
 ], style=SIDEBAR_STYLE)
 
 navbar = dbc.Navbar(
     dbc.Container([
-        html.Div("Taller de Simulacion de Sistemas - Simulador de Ahorros", 
-                className="navbar-brand text-white"),
+        html.Div(
+            "Taller de Simulación - Simulador de Ahorros",
+            className="navbar-brand"
+        ),
     ]),
-    color="dark", dark=True
+    color="dark",
+    dark=True,
+    sticky="top"
 )
 
 content = html.Div(id="page-content", style=CONTENT_STYLE)
+
 app.layout = html.Div([
     dcc.Location(id="url"),
     sidebar,
     navbar,
     content,
-    dcc.Store(id="store-resultados")
+    dcc.Store(id="store-resultados"),
+    dcc.Store(id="store-file-data"),
+    dcc.Download(id="descargar-reporte")
 ])
 
-@app.callback(Output("page-content", "children"), Input("url", "pathname"))
+@app.callback(
+    Output("page-content", "children"),
+    Input("url", "pathname")
+)
 def render_page_content(pathname):
     if pathname == "/" or pathname == "/simulacion":
         return interfaz.layout()
-    return html.Div([html.H3("Página no encontrada")])
+    return html.Div([
+        dbc.Alert(
+            "Página no encontrada - 404",
+            color="danger",
+            className="mt-5"
+        )
+    ])
 
+# Registrar callbacks
 interfaz.register_callbacks(app)
-
-@app.callback([
-    Output('store-resultados', 'data'),
-    Output('tabs', 'active_tab')
-], 
-[Input('calcular-proyecciones', 'n_clicks')],
-[State('salario-mensual', 'value'), 
- State('meses-ahorro', 'value'),
- State('tasa-crecimiento', 'value'),
- State('store-file-data', 'data')])
-def calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, file_data):
-    if not n_clicks:
-        return {}, "tab-datos"
-    
-    resumen, resultados = algoritmo.calcular_proyecciones(n_clicks, salario_mensual, meses_ahorro, tasa_crecimiento, file_data)
-    
-    return resultados, "tab-calculos"
+generarReporte.register_callbacks(app)
 
 if __name__ == '__main__':
     app.run(debug=True)

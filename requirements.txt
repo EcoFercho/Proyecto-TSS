@@ -6,3 +6,12 @@ scipy
 plotly
 openpyxl
 dash-table
+
+pip install reportlab
+pip install -U kaleido
+
+
+pip install reportlab plotly dash dash-bootstrap-components pandas numpy scipy
+
+pip install dash dash-bootstrap-components pandas numpy scipy plotly fpdf2 kaleido
+pip install fpdf2==2.7.4 kaleido==0.2.1 plotly==5.14.1
