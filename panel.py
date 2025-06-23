@@ -77,9 +77,15 @@ def render_page_content(pathname):
 interfaz.register_callbacks(app)
 generarReporte.register_callbacks(app)
 
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+
+
+# Para deploy 
 # Exponer servidor para Gunicorn en producción
 server = app.server
-
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 8050))

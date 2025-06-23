@@ -186,7 +186,7 @@ def layout():
                             ], md=4),
                             
                             dbc.Col([
-                                dbc.Label("Estabilidad Laboral:", html_for="estabilidad-laboral"),
+                                dbc.Label("Condición Laboral:", html_for="estabilidad-laboral"),
                                 dcc.Dropdown(
                                     id="estabilidad-laboral",
                                     options=[
