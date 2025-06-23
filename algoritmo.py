@@ -95,13 +95,13 @@ def calcular_proyecciones(n_clicks, salario, meses, tasa_crecimiento, file_data,
                 x=["0% Simple", "3% Simple", "7% Simple"], 
                 y=[saldo_simple, saldo_3, saldo_7],
                 name="Fórmula Simple",
-                marker_color=['#636EFA', '#EF553B', '#00CC96']
+                marker_color=["#1100AD", "#1100AD", "#1100AD"]
             ),
             go.Bar(
                 x=["3% EDO", "7% EDO"], 
                 y=[A_3[-1], A_7[-1]],
                 name="Modelo EDO",
-                marker_color=['#AB63FA', '#FFA15A']
+                marker_color=["#BB0A37", "#BB0A37"]
             )
         ])
         fig1.update_layout(
