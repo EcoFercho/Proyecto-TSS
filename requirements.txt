@@ -7,3 +7,4 @@ dash-bootstrap-components
 matplotlib 
 reportlab 
 openpyxl
+gunicorn==23.0.0
