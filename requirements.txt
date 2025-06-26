@@ -1,14 +1,3 @@
-# numpy 
-# pandas
-# scipy
-# plotly
-# dash
-# dash-bootstrap-components
-# matplotlib 
-# reportlab 
-# openpyxl
-# gunicorn==23.0.0
-
 dash==2.18.1
 dash-bootstrap-components==1.6.0
 numpy==1.26.4

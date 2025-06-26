@@ -1,18 +1,17 @@
 import io
 import numpy as np
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from dash import dcc, Input, Output, State
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from dash import dcc
-from io import BytesIO
-import matplotlib
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from dash import dcc, Input, Output, State
 import dash_bootstrap_components as dbc
+import matplotlib
 matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
+from io import BytesIO
 
 def generar_grafico_comparativo(resultados):
     """Genera gráfico comparativo de resultados, solo si los valores son no negativos"""
@@ -90,7 +89,6 @@ def generar_grafico_evolucion_simple(resultados):
         simple_3 = [calcular_serie_uniforme(t, 0.03) for t in meses]
         simple_7 = [calcular_serie_uniforme(t, 0.07) for t in meses]
         
-        # Graficar
         ax.plot(meses, simple_0, label='Simple 0%', linestyle='--', color='#3498db', linewidth=2)
         ax.plot(meses, simple_3, label='Simple 3%', linestyle='--', color='#2ecc71', linewidth=2)
         ax.plot(meses, simple_7, label='Simple 7%', linestyle='--', color='#f1c40f', linewidth=2)
@@ -101,7 +99,6 @@ def generar_grafico_evolucion_simple(resultados):
         ax.legend()
         ax.grid(True, linestyle='--', alpha=0.6)
         
-        # Añadir anotaciones
         ax.annotate(f'Final 0%: Bs. {resultados["resultados"]["simple_0"]:,.2f}',
                     xy=(meses[-1], simple_0[-1]),
                     xytext=(10, 10), textcoords='offset points',
@@ -151,7 +148,7 @@ def generar_grafico_evolucion_edos(resultados):
         
         meses = np.arange(0, resultados['datos_entrada']['meses'] + 1)
         pmt_0 = resultados['datos_entrada']['ahorro_mensual'] / resultados['datos_entrada']['factor_ahorro']
-        g = resultados['datos_entrada']['tasa_crecimiento'] / 100  # Tasa crecimiento anual
+        g = resultados['datos_entrada']['tasa_crecimiento'] / 100
         
         def calcular_ahorro_edo(t, r):
             s = [0.0] 
@@ -165,7 +162,6 @@ def generar_grafico_evolucion_edos(resultados):
         edo_3 = calcular_ahorro_edo(meses, 0.03)
         edo_7 = calcular_ahorro_edo(meses, 0.07)
         
-        # Graficar
         ax.plot(meses, edo_3, label='EDO 3%', color='#e74c3c', linewidth=2)
         ax.plot(meses, edo_7, label='EDO 7%', color='#9b59b6', linewidth=2)
         
@@ -175,7 +171,6 @@ def generar_grafico_evolucion_edos(resultados):
         ax.legend()
         ax.grid(True, linestyle='--', alpha=0.6)
         
-        # Añadir anotaciones
         ax.annotate(f'Final 3%: Bs. {resultados["resultados"]["edo_3"]:,.2f}',
                     xy=(meses[-1], edo_3[-1]),
                     xytext=(10, 10), textcoords='offset points',
@@ -238,6 +233,50 @@ def generar_grafico_torta(resultados):
         return buf
     except Exception as e:
         print(f"Error generando gráfico torta: {str(e)}")
+        return None
+    finally:
+        if fig is not None:
+            plt.close(fig)
+
+def generar_grafico_ingresos_gastos(resultados):
+    """Genera gráfico de barras comparativo para ingreso bruto, ingreso neto, gasto mensual y ahorro mensual"""
+    plt.close('all')
+    fig = None
+    try:
+        valores = [
+            resultados['datos_entrada']['salario'],  # Ingreso bruto
+            resultados['datos_entrada']['ingreso_neto'],  # Ingreso neto
+            resultados['datos_entrada']['gasto'],  # Gasto mensual
+            resultados['datos_entrada']['ahorro_mensual']  # Ahorro mensual inicial
+        ]
+        if any(v < 0 for v in valores):
+            print("No se puede generar gráfico de ingresos y gastos: valores negativos detectados")
+            return None
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        
+        categorias = ['Ingreso Bruto', 'Ingreso Neto', 'Gasto Mensual', 'Ahorro Mensual']
+        colors = ['#3498db', '#2ecc71', '#e74c3c', '#f1c40f'] 
+        bars = ax.bar(categorias, valores, color=colors)
+        
+        ax.set_title('Comparación de Ingresos, Gastos y Ahorro Mensual', pad=20)
+        ax.set_ylabel('Monto (Bs)')
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height,
+                    f'Bs. {height:,.2f}',
+                    ha='center', va='bottom', fontsize=9)
+
+        plt.tight_layout()
+        
+        buf = BytesIO()
+        fig.savefig(buf, format='png', dpi=150)
+        buf.seek(0)
+        return buf
+    except Exception as e:
+        print(f"Error generando gráfico de ingresos y gastos: {str(e)}")
         return None
     finally:
         if fig is not None:
@@ -390,6 +429,17 @@ def generar_reporte_completo(resultados):
             ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f8f9fa')])
         ]))
         story.append(tabla_entrada)
+        story.append(Spacer(1, 0.3*inch))
+
+        story.append(Paragraph("<b>Comparación Visual de Ingresos, Gastos y Ahorro:</b>", estilo_texto))
+        img_ingresos_gastos = generar_grafico_ingresos_gastos(resultados)
+        if img_ingresos_gastos:
+            story.append(Image(img_ingresos_gastos, width=6*inch, height=3.5*inch))
+        else:
+            story.append(Paragraph(
+                "<b>Nota:</b> No se generó el gráfico de ingresos y gastos debido a valores negativos.",
+                estilo_texto
+            ))
         story.append(Spacer(1, 0.3*inch))
 
         story.append(Paragraph("<b>Variables que Afectan al Ahorro:</b>", estilo_subtitulo))
@@ -558,7 +608,7 @@ def generar_reporte_completo(resultados):
         La rentabilidad anualizada combina el interés con el crecimiento salarial en los modelos EDO.
         """, estilo_texto))
         
-        story.append(Spacer(1, 0.5*inch))
+        story.append(PageBreak())
         
         story.append(Paragraph("<b>Comparación Visual de Resultados:</b>", estilo_texto))
         img_comparativo = generar_grafico_comparativo(resultados)
@@ -569,7 +619,7 @@ def generar_reporte_completo(resultados):
                 "<b>Nota:</b> No se generó el gráfico debido a resultados negativos. Esto indica que tus gastos superan tus ingresos, generando un déficit proyectado.",
                 estilo_texto
             ))
-        story.append(PageBreak())
+        story.append(Spacer(1, 0.2*inch))
 
         story.append(Paragraph("<b>Evolución Temporal - Fórmulas Simples:</b>", estilo_texto))
         img_evol_simple = generar_grafico_evolucion_simple(resultados)
@@ -588,7 +638,7 @@ def generar_reporte_completo(resultados):
         bajo diferentes tasas de interés anual.
         """, estilo_texto))
         
-        story.append(Spacer(1, 0.3*inch))
+        story.append(PageBreak())
         
         story.append(Paragraph("<b>Evolución Temporal - Modelos EDO:</b>", estilo_texto))
         img_evol_edos = generar_grafico_evolucion_edos(resultados)
@@ -607,21 +657,21 @@ def generar_reporte_completo(resultados):
         considerando tasas de interés compuesto más crecimiento salarial.
         """, estilo_texto))
         
-        story.append(Spacer(1, 0.3*inch))
- 
+        story.append(Spacer(1, 0.02*inch))
+
         story.append(Paragraph("<b>Distribución Comparativa de Resultados:</b>", estilo_texto))
         img_torta = generar_grafico_torta(resultados)
         if img_torta:
-            story.append(Image(img_torta, width=5*inch, height=5*inch))
+            story.append(Image(img_torta, width=4.5*inch, height=4.5*inch))
         else:
             story.append(Paragraph(
                 "<b>Nota:</b> No se generó el gráfico debido a resultados negativos. Esto indica que tus gastos superan tus ingresos, generando un déficit proyectado.",
                 estilo_texto
             ))
-        story.append(Spacer(1, 0.3*inch))
+        story.append(PageBreak())
         
         story.append(Paragraph("Conclusión del Análisis Financiero", estilo_subtitulo))
-        story.append(Spacer(1, 0.1*inch))
+        story.append(Spacer(1, 0.0*inch))
         
         ahorro_mensual = resultados['datos_entrada']['ahorro_mensual']
         ingreso_neto = resultados['datos_entrada']['ingreso_neto']
@@ -652,7 +702,7 @@ def generar_reporte_completo(resultados):
             """
         elif proporcion_gasto > 80:
             conclusion_texto = f"""
-            Tu re reporte muestra que aunque puedes ahorrar Bs. {ahorro_mensual:,.2f} al mes, tus gastos (Bs. {gasto:,.2f}) representan el {proporcion_gasto:.1f}% de tu ingreso neto (Bs. {ingreso_neto:,.2f}), lo cual es muy alto. 
+            Tu reporte muestra que aunque puedes ahorrar Bs. {ahorro_mensual:,.2f} al mes, tus gastos (Bs. {gasto:,.2f}) representan el {proporcion_gasto:.1f}% de tu ingreso neto (Bs. {ingreso_neto:,.2f}), lo cual es muy alto. 
             Esto limita tu capacidad de ahorro, como se ve en los resultados (hasta Bs. {resultados['resultados']['edo_7']:,.2f} en {resultados['datos_entrada']['meses']//12} años con EDO al 7%). 
             {f'Tus {", ".join(vars_mensaje)} están afectando tu capacidad de ahorrar más.' if vars_mensaje else ''} 
             Por ejemplo, si tienes gastos médicos altos, considera un seguro de salud. 
@@ -669,10 +719,7 @@ def generar_reporte_completo(resultados):
             """
         
         story.append(Paragraph(conclusion_texto, estilo_texto))
-        story.append(Spacer(1, 0.3*inch))
-        
-        story.append(PageBreak())
-        
+
         story.append(Paragraph("3. RECOMENDACIONES ESTRATÉGICAS", estilo_subtitulo))
         story.append(Spacer(1, 0.2*inch))
         
